@@ -25,21 +25,60 @@ namespace APIBook2.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Livro>>> GetLivros()
         {
-            return await _context.Livros.ToListAsync();
+            try
+            {
+                return await _context.Livros.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+
         }
 
         // GET: api/Livroes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Livro>> GetLivro(int id)
         {
-            var livro = await _context.Livros.FindAsync(id);
-
-            if (livro == null)
+            try
             {
-                return NotFound();
-            }
+                var livro = await _context.Livros.FindAsync(id);
 
-            return livro;
+                if (livro == null)
+                {
+                    return NotFound();
+                }
+
+                return livro;
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+        // GET: api/Livroes/5
+        [HttpGet("obterporautor/{autor}")]
+
+        public async Task<ActionResult<IEnumerable<Livro>>> GetByAutor(string autor)
+        {
+            try
+            {
+
+                var livros = await _context.Livros.ToListAsync();
+                var livro = livros.Where(x => x.Autor == autor).ToList();
+
+                if (livro == null)
+                {
+                    return NotFound();
+                }
+
+                return livro;
+            }
+            catch (Exception e)
+            {
+                return NotFound($"Ocorreu um erro: {e.Message}");
+            }
         }
 
         // PUT: api/Livroes/5
@@ -78,26 +117,40 @@ namespace APIBook2.Controllers
         [HttpPost]
         public async Task<ActionResult<Livro>> PostLivro(Livro livro)
         {
-            _context.Livros.Add(livro);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Livros.Add(livro);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLivro", new { id = livro.Id }, livro);
+                return CreatedAtAction("GetLivro", new { id = livro.Id }, livro);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         // DELETE: api/Livroes/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLivro(int id)
         {
-            var livro = await _context.Livros.FindAsync(id);
-            if (livro == null)
+            try
             {
-                return NotFound();
+                var livro = await _context.Livros.FindAsync(id);
+                if (livro == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Livros.Remove(livro);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Livros.Remove(livro);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (DbUpdateConcurrencyException)
+            {
+                return NoContent();
+            }
         }
 
         private bool LivroExists(int id)
