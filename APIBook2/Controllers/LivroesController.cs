@@ -25,6 +25,7 @@ namespace APIBook2.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Livro>>> GetLivros()
         {
+
             try
             {
                 return await _context.Livros.ToListAsync();
